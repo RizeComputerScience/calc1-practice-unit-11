@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Unit 11 Practice: Adding Up: The Definite Integral</title>
+<title>Unit 11 Practice</title>
 <meta name="description" content="Practice antiderivatives, Riemann sums and definite integrals with feedback on each line of your work.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -2789,7 +2789,7 @@ var selfcheck = (function () {
    ==================================================================================== */
 
 /* ---------------- links ---------------- */
-var PAUL_C = 'https://tutorial.math.lamar.edu/Classes/CalcI/', PAUL_P = 'https://tutorial.math.lamar.edu/Problems/CalcI/';
+var PAUL_C = 'https://tutorial.math.lamar.edu/Classes/CalcI/';
 function paulEx(page, title, ex) { return [PAUL_C + page + '.aspx', 'Paul’s Online Math Notes: ' + title + (ex ? ', ' + ex : '')]; }
 var T_POWER = paulEx('ComputingIndefiniteIntegrals', 'Computing Indefinite Integrals', 'Example 1');
 var T_INIT = paulEx('ComputingIndefiniteIntegrals', 'Computing Indefinite Integrals', 'Example 4(a)');
@@ -2802,7 +2802,7 @@ var T_FTC1 = paulEx('DefnOfDefiniteIntegral', 'Definition of the Definite Integr
 /* ---------------- the sections ---------------- */
 var SECTIONS_P = [
   { id: 'sec-anti', title: 'Antiderivatives', nav: 'Antiderivatives', lede: 'These go with Paul’s [Computing Indefinite Integrals](' + T_POWER[0] + '), Examples 1, 2 and 4(a).' },
-  { id: 'sec-sums', title: 'Riemann Sums', nav: 'Sums', lede: 'These go with Paul’s [Area Problem](' + T_AREA[0] + '). The second adds up a table of rates, as in this unit’s guide.' },
+  { id: 'sec-sums', title: 'Riemann Sums', nav: 'Sums', lede: 'These go with Paul’s [Area Problem](' + T_AREA[0] + '). The second adds up a table of rates, as in Example 11.4 of Unit 11 Worked Examples.' },
   { id: 'sec-defn', title: 'The Definite Integral', nav: 'Definite Integral', lede: 'These go with Paul’s [Definition of the Definite Integral](' + T_PROPS[0] + '): net area, and Examples 4 and 5.' },
   { id: 'sec-ftc', title: 'The Fundamental Theorem', nav: 'Fundamental Theorem', lede: 'These go with Paul’s [Computing Definite Integrals](' + T_FTC2[0] + '), Example 2, and [Definition of the Definite Integral](' + T_FTC1[0] + '), Example 6.' }
 ];
@@ -3227,14 +3227,14 @@ function sectionHTML(s, n) {
   return sec(s.id, String(n + 1), s.title, s.lede) + col(ps.map(function (p) { return blk(p.id, function () { return problemHTML(p); }); }).join(''));
 }
 function backHTML() {
-  return sec('sec-back', '', 'Back to Paul', '') + prose('', [
-    'If one type of problem gave you trouble, rework Paul’s practice problems for it: [Computing Indefinite Integrals](' + PAUL_P + 'ComputingIndefiniteIntegrals.aspx), [Area Problem](' + PAUL_P + 'AreaProblem.aspx), [Definition of the Definite Integral](' + PAUL_P + 'DefnOfDefiniteIntegral.aspx) or [Computing Definite Integrals](' + PAUL_P + 'ComputingDefiniteIntegrals.aspx).',
-    'Next, complete Problem Set 9, Parts 1 and 2. Unit 12 continues in Paul’s notes with [Differentials](' + PAUL_C + 'Differentials.aspx).']);
+  return sec('sec-back', '', 'What Comes Next', '') + prose('', [
+    'If one kind of problem gave you trouble, find the example of that kind in Unit 11 Worked Examples, cover its solution, and work it by hand.',
+    'Next, complete the Unit 11 Problem Set.']);
 }
 function page() {
-  return header('Unit 11 Practice', SECTIONS_P.map(function (s) { return ['#' + s.id, s.nav]; }).concat([['#sec-back', 'Back to Paul']])) +
-    '<main id="top">' + hero({ kicker: 'Calculus I · Unit 11', title: 'Unit 11 Practice: Adding Up: The Definite Integral',
-      dek: 'Use this page after the Unit 11 reading and Paul’s practice problems. For each problem, choose the method, then type each line of the work. Each line is checked before the next one opens. Type a power with ⟦^⟧, as in ⟦x^2⟧ or ⟦x^(3/2)⟧, and put a whole top or bottom in parentheses, as in ⟦(x + 1)/(x − 2)⟧.' }) +
+  return header('Unit 11 Practice', SECTIONS_P.map(function (s) { return ['#' + s.id, s.nav]; }).concat([['#sec-back', 'Next']])) +
+    '<main id="top">' + hero({ kicker: 'Calculus I · Unit 11: Adding Up: The Definite Integral', title: 'Unit 11 Practice',
+      dek: 'Use this page after you read Unit 11: Adding Up: The Definite Integral and Unit 11 Worked Examples. For each problem, choose the method, then type each line of the work. Each line is checked before the next one opens. Type a power with ⟦^⟧, as in ⟦x^2⟧ or ⟦x^(3/2)⟧, and put a whole top or bottom in parentheses, as in ⟦(x + 1)/(x − 2)⟧.' }) +
     SECTIONS_P.map(sectionHTML).join('') + backHTML() + '</main>';
 }
 expose({ PROBLEMS: PROBLEMS, problemHTML: problemHTML, formProblem: formProblem, stepDone: stepDone });
