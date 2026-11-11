@@ -2798,13 +2798,35 @@ var T_PROPS = paulEx('DefnOfDefiniteIntegral', 'Definition of the Definite Integ
 var T_NET = paulEx('DefnOfDefiniteIntegral', 'Definition of the Definite Integral', 'Interpretations of Definite Integral');
 var T_FTC2 = paulEx('ComputingDefiniteIntegrals', 'Computing Definite Integrals', 'Example 2');
 var T_FTC1 = paulEx('DefnOfDefiniteIntegral', 'Definition of the Definite Integral', 'Example 6');
+/* More Practice (2026-11-10) */
+var T_EXPAND = paulEx('ComputingIndefiniteIntegrals', 'Computing Indefinite Integrals', 'Example 1(e)');
+var T_SPLIT = paulEx('ComputingIndefiniteIntegrals', 'Computing Indefinite Integrals', 'Example 1(f)');
+var T_TRIG = paulEx('ComputingIndefiniteIntegrals', 'Computing Indefinite Integrals', 'Example 2(a)');
+var T_DEF = paulEx('DefnOfDefiniteIntegral', 'Definition of the Definite Integral');
+var T_CONT = paulEx('ComputingDefiniteIntegrals', 'Computing Definite Integrals', 'Example 1(c)');
+var T_LNNEG = paulEx('ComputingDefiniteIntegrals', 'Computing Definite Integrals', 'Example 3(d)');
+var DESMOS = 'https://www.desmos.com/scientific';
+
+/* ---------------- form guards (More Practice): a function (raw) -> diagnosis or null, run only on answers the engine judges correct ---------------- */
+var FORM = {
+  /* no parentheses left: for a row that asks to multiply out */
+  expanded: function (raw) { return /[()]/.test(raw) ? 'That is equal, but it still has parentheses. Multiply out the square so that none are left.' : null; },
+  /* the quotient split into separate powers of z */
+  split: function (raw) {
+    var s = String(raw).replace(/\s+/g, '');
+    if (/\)\//.test(s)) return 'That is equal, but it is still one fraction. Divide each term of the top by `z^4` on its own.';
+    if (/z(\^\(?\d+\)?)?\/z/.test(s)) return 'That is equal, but simplify each piece: subtract the exponents, as in `F{z^8}{z^4} = z^4`.';
+    return null;
+  }
+};
 
 /* ---------------- the sections ---------------- */
 var SECTIONS_P = [
   { id: 'sec-anti', title: 'Antiderivatives', nav: 'Antiderivatives', lede: 'These go with Paul’s [Computing Indefinite Integrals](' + T_POWER[0] + '), Examples 1, 2 and 4(a).' },
   { id: 'sec-sums', title: 'Riemann Sums', nav: 'Sums', lede: 'These go with Paul’s [Area Problem](' + T_AREA[0] + '). The second adds up a table of rates, as in Example 11.4 of Unit 11 Worked Examples.' },
   { id: 'sec-defn', title: 'The Definite Integral', nav: 'Definite Integral', lede: 'These go with Paul’s [Definition of the Definite Integral](' + T_PROPS[0] + '): net area, and Examples 4 and 5.' },
-  { id: 'sec-ftc', title: 'The Fundamental Theorem', nav: 'Fundamental Theorem', lede: 'These go with Paul’s [Computing Definite Integrals](' + T_FTC2[0] + '), Example 2, and [Definition of the Definite Integral](' + T_FTC1[0] + '), Example 6.' }
+  { id: 'sec-ftc', title: 'The Fundamental Theorem', nav: 'Fundamental Theorem', lede: 'These go with Paul’s [Computing Definite Integrals](' + T_FTC2[0] + '), Example 2, and [Definition of the Definite Integral](' + T_FTC1[0] + '), Example 6.' },
+  { id: 'sec-more', title: 'More Practice (Only If You Want It)', nav: 'More Practice', lede: 'Nothing in this section is required. If a kind of problem above took you more than one try, the problem of the same kind here gives you another go: Problems 9 and 10 for antiderivatives, Problems 11 and 12 for Riemann sums, Problems 14 and 15 for Part II, and Problems 16 and 17 for Part I with the chain rule. Problem 13 reads a definite integral from a Riemann sum, as in Example 11.7 of Unit 11 Worked Examples. The Unit 11 Problem Set comes next either way.' }
 ];
 
 /* the integrands and rates the figures draw */
@@ -2812,6 +2834,16 @@ function u11f3(x) { return x * x + 2 * x; }
 function u11f5(x) { return 4 - 2 * x; }
 function u11f7(x) { return 4 * x * x * x - 3 * x * x + 2; }
 function u11f8(t) { return Math.sqrt(t * t * t + 8); }
+/* More Practice figures */
+function u11m14(x) { return 2 * Math.cos(x) - 1; }
+function u11m17f(t) { return t <= 4 ? 2 - t : t - 6; }                     /* the segments (0, 2), (4, −2), (7, 1) */
+function u11m17A(s) { return s <= 4 ? 2 * s - s * s / 2 : s * s / 2 - 6 * s + 16; }   /* the net area under f from 0 to s */
+function u11m17h(x) { return u11m17A(x * x); }
+function u11piFmt(v) {
+  var k = Math.round(v / (Math.PI / 6));
+  if (Math.abs(v - k * Math.PI / 6) > 1e-9) return fmtNum(v);
+  return { 0: '0', 2: 'π/3', 3: 'π/2', 6: 'π' }[k] || fmtNum(v);
+}
 
 /* ---------------- the problems ---------------- */
 var PROBLEMS = [
@@ -3064,7 +3096,287 @@ var PROBLEMS = [
     graph: { x: [0, 3], y: [0, 7], ticks: { x: 0.5, y: 1 }, labels: { x: 't' }, fns: [{ f: u11f8 }], shade: [{ f: 0, a: 1, b: 2, role: 'outside' }],
       dots: [{ x: 2, y: 4, label: '(2, 4)', at: 'nw' }],
       aria: 'The graph of y = square root of (t cubed plus 8) from t = 0 to 3, with the region under it from t = 1 to t = 2 shaded. The point (2, 4) at the right edge of the shading is marked.' },
-    after: 'The shaded area is `g(2)`. As the right edge moves, the area grows at the rate of the height there, so `g′(2) = 4`.' }
+    after: 'The shaded area is `g(2)`. As the right edge moves, the area grows at the rate of the height there, so `g′(2) = 4`.' },
+
+  /* ================= More Practice (optional), added 2026-11-10 by the clarity rebuild =================
+     From the practice twins removed from Unit 11 Worked Examples (plan/clarity-rebuild/twins/unit-11.md: 11.1, 11.3, 11.4,
+     11.6, 11.7, 11.9, 11.10) and the value-add kinds (plan/clarity-rebuild/units/unit-11/value-add.md: Paul's Computing
+     Indefinite Integrals 12, a quotient over one power; Computing Definite Integrals 7 and 13, Part II that does not apply and
+     ln|y| on negative numbers). Every key and wrong answer: SPEC.md, "More Practice"; sympy: tests/check_math.py; judging:
+     tests/judge_check.js. */
+
+  /* 9. (twin 11.1) e^x, sin x and a power on the bottom */
+  { id: 'm1', sec: 'sec-more', task: 'Find the most general antiderivative `G(x)`.', board: 'g(x) = 4e^x − 3 sin x + F{6}{x^4}', teach: T_TRIG,
+    steps: [
+      { lead: 'Write `F{6}{x^4}` as a power of `x`.', ask: 'F{6}{x^4} = 6x^n, n =', num: true, ans: '-4',
+        wrongs: [['4', 'A power on the bottom becomes a negative power on top: `F{1}{x^4} = x^(−4)`.', ['#ex-p1', 'See Problem 1: a power on the bottom']],
+          [['1/4', '0.25'], '`x^(1/4)` is the fourth root of `x`. A power on the bottom becomes a negative power on top: `F{1}{x^4} = x^(−4)`.']],
+        hints: ['Use `F{1}{x^n} = x^(−n)`.'] },
+      { lead: 'Integrate `6x^(−4)` with the power rule: add 1 to the exponent, then divide by the new exponent.', ask: 'I{}{} 6x^(−4) dd{x} =', ans: '-2x^(-3)', upToC: true,
+        wrongs: [['2x^(-3)', 'The new exponent is `−3`, so divide by `−3`: `F{6}{−3} = −2`.'],
+          ['(-6/5)x^(-5)', 'The exponent goes up by 1: `−4 + 1 = −3`. Going down to `−5` is the wrong direction.'],
+          ['-24x^(-5)', 'That is the derivative of `6x^(−4)`. Integrating goes the other way.']],
+        hints: ['Add 1 to the exponent `−4`. Then divide by that new exponent.'],
+        why: 'Check: the derivative of `−2x^(−3)` is `6x^(−4)`.', teach: T_POWER },
+      { lead: 'Which antiderivative of `−3 sin x` is right?', ok: 0, pick: [
+        ['`3 cos x`', '`I{}{} sin x dd{x} = −cos x + c`, so `−3 sin x` integrates to `−3(−cos x) = 3 cos x`.'],
+        ['`−3 cos x`', 'The derivative of `−3 cos x` is `3 sin x`, not `−3 sin x`. Since `I{}{} sin x dd{x} = −cos x + c`, the two minus signs make `+3 cos x`.'],
+        ['`−3x sin x`', 'Only a constant integrates to itself times `x`. `sin x` changes with `x`, so use `I{}{} sin x dd{x} = −cos x + c`.']] },
+      { lead: 'Put the three antiderivatives together, with the constant.', ask: 'G(x) =', ans: '4e^x + 3cos(x) - 2x^(-3) + c', upToC: true, needC: true,
+        wrongs: [['4e^x - 3cos(x) - 2x^(-3)', 'The middle term is `+3 cos x`, from the last step: the two minus signs cancel.'],
+          ['4e^x + 3cos(x) + 2x^(-3)', 'The power term is `−2x^(−3)`: dividing 6 by the new exponent `−3` gives `−2`.'],
+          ['4e^(x+1)/(x+1) + 3cos(x) - 2x^(-3)', '`e^x` is not a power of `x`, so the power rule does not apply. `I{}{} e^x dd{x} = e^x + c`.']],
+        noC: ['Add `+ c`. The most general antiderivative is a whole family of functions, and `+ c` says so.', T_TRIG],
+        hints: ['Use `I{}{} e^x dd{x} = e^x + c`, then `3 cos x` and `−2x^(−3)` from the last two steps. Write one `+ c` at the end.'],
+        why: 'Check: the derivative of `4e^x + 3 cos x − 2x^(−3)` is `4e^x − 3 sin x + 6x^(−4)`.' }] },
+
+  /* 10. (value-add: Paul, Computing Indefinite Integrals, Problem 12) a quotient over one power: split it first */
+  { id: 'm2', sec: 'sec-more', board: 'I{}{} F{z^8 − 6z^5 + 4z^3 − 2}{z^4} dd{z}', v: 'z', teach: T_SPLIT,
+    steps: [
+      { lead: 'What do you do first?', ok: 0, pick: [
+        ['Divide each term of the top by `z^4`', 'The bottom is a single power, so each term divides on its own and the quotient becomes a sum of powers of `z`.'],
+        ['Integrate the top and the bottom separately', 'There is no quotient rule for integrals: the integral of a quotient is not the quotient of the integrals. Divide each term by `z^4` first.'],
+        ['Integrate the top, then divide by `z^4`', '`z^4` changes with `z`, so it cannot come out of the integral. Only a constant factor can. Divide each term by `z^4` first.']] },
+      { lead: 'Divide each term of the top by `z^4`. Write each piece as a number times a power of `z`.', ask: 'F{z^8 − 6z^5 + 4z^3 − 2}{z^4} =', ans: 'z^4 - 6z + 4z^(-1) - 2z^(-4)', form: FORM.split,
+        wrongs: [['z^4 - 6z + 4z^(-1) - 2', 'Divide the last term too: `F{−2}{z^4} = −2z^(−4)`.'],
+          ['z^4 - 6z + 4z - 2z^(-4)', '`F{z^3}{z^4} = z^(3 − 4) = z^(−1)`, not `z`. Subtract the exponents in that order.'],
+          ['z^2 - 6z^(5/4) + 4z^(3/4) - 2z^(-4)', 'Dividing powers subtracts the exponents: `F{z^8}{z^4} = z^(8 − 4) = z^4`. Dividing the exponents gives `z^2`.']],
+        hints: ['Subtract exponents: `F{z^8}{z^4} = z^(8 − 4)`. Do the same for each term, and write `F{−2}{z^4}` as `−2z^(−4)`.'] },
+      { lead: 'Which antiderivative of `4z^(−1)` is right?', ok: 0, pick: [
+        ['`4 ln|z|`', '`4z^(−1) = F{4}{z}`, and `I{}{} F{1}{z} dd{z} = ln|z| + c`.'],
+        ['`F{4z^0}{0}`, from the power rule', 'The power rule divides by `n + 1`, which is 0 when `n = −1`, so it does not apply here. `I{}{} F{1}{z} dd{z} = ln|z| + c` covers this case.', ['#ex-p1', 'See Problem 1: the power −1']],
+        ['`−4z^(−2)`', 'That is the derivative of `4z^(−1)`, not an antiderivative. Check a candidate by differentiating it.']] },
+      { lead: 'Integrate the last term with the power rule.', ask: 'I{}{} −2z^(−4) dd{z} =', ans: '(2/3)z^(-3)', upToC: true,
+        wrongs: [['(-2/3)z^(-3)', 'Dividing by the new exponent `−3` changes the sign: `F{−2}{−3} = F{2}{3}`.'],
+          ['(2/5)z^(-5)', 'The exponent goes up by 1: `−4 + 1 = −3`. Going down to `−5` is the wrong direction.'],
+          ['8z^(-5)', 'That is the derivative of `−2z^(−4)`. Integrating goes the other way.']],
+        hints: ['Add 1 to the exponent `−4`, then divide `−2` by that new exponent.'],
+        why: 'Check: the derivative of `F{2}{3}z^(−3)` is `−2z^(−4)`.' },
+      { lead: 'Integrate every term and add one constant.', ask: 'I{}{} F{z^8 − 6z^5 + 4z^3 − 2}{z^4} dd{z} =', ans: 'z^5/5 - 3z^2 + 4ln|z| + (2/3)z^(-3) + c', upToC: true, needC: true,
+        wrongs: [['z^5/5 - 6z^2 + 4ln|z| + (2/3)z^(-3)', '`I{}{} 6z dd{z} = 6 · F{z^2}{2} = 3z^2`. Divide by the new exponent, 2.'],
+          ['z^5/5 - 3z^2 + 4ln|z| - (2/3)z^(-3)', 'The last term is `+F{2}{3}z^(−3)`, from the step before: dividing `−2` by `−3` gives a positive number.'],
+          ['z^5 - 3z^2 + 4ln|z| + (2/3)z^(-3)', '`I{}{} z^4 dd{z} = F{z^5}{5}`. Divide by the new exponent, 5.']],
+        noC: ['Add `+ c`. Every function in the family is an answer, and `+ c` says so.', T_SPLIT],
+        hints: ['Integrate `z^4` and `−6z` with the power rule, then use `4 ln|z|` and `F{2}{3}z^(−3)` from the last two steps.'] }] },
+
+  /* 11. (twin 11.3) a left sum from a formula, too low */
+  { id: 'm3', sec: 'sec-more', task: 'Estimate the area under the graph of `f` on `[0, 4]` with a left sum and `n = 4` rectangles.', board: 'f(x) = sqrt(x)', teach: T_AREA,
+    steps: [
+      { lead: 'Find the width of each rectangle.', ask: 'Δx = F{b − a}{n} =', num: true, ans: '1',
+        wrongs: [['4', 'That is `b − a`, the whole interval. Divide it into `n = 4` equal pieces.'],
+          [['1/4', '0.25'], 'That is `F{n}{b − a}`, upside down. The width is `F{b − a}{n} = F{4 − 0}{4}`.']],
+        hints: ['Here `a = 0`, `b = 4` and `n = 4`.'] },
+      { lead: 'List the left endpoints, from left to right, separated by commas.', ask: '"left endpoints:"', ans: '0, 1, 2, 3', list: true, ordered: true, noPal: true,
+        wrongs: [['1, 2, 3, 4', 'Those are the right endpoints. Left endpoints start at `a = 0`.', ['#ex-p3', 'See Problem 3: left and right endpoints']],
+          ['0.5, 1.5, 2.5, 3.5', 'Those are the midpoints. Left endpoints start at `a = 0` and go up by `Δx = 1`.']],
+        hints: ['Start at `a = 0` and add `Δx = 1` until you have four points.'] },
+      { lead: 'Add the four left heights, then multiply by `Δx`. A calculator helps with the roots, such as the [Desmos scientific calculator](' + DESMOS + ').', ask: 'L_4 = 1 · (sqrt(0) + sqrt(1) + sqrt(2) + sqrt(3)) =', num: true, ans: '1 + sqrt(2) + sqrt(3)', tol: 0.006,
+        wrongs: [['6.146', 'That is the right sum: it adds `sqrt(4) = 2` and leaves out `sqrt(0)`. The left sum uses `x = 0`, 1, 2 and 3.'],
+          ['6', 'That adds the endpoints `0 + 1 + 2 + 3`. Add the heights instead, `f(x) = sqrt(x)` at each endpoint.'],
+          [['16/3', '5.333', '5.33'], 'That is the exact area, `F{16}{3}`. The left sum adds the four heights `sqrt(0)`, `sqrt(1)`, `sqrt(2)` and `sqrt(3)`.']],
+        hints: ['`sqrt(0) = 0` and `sqrt(1) = 1`. Add `sqrt(2) ≈ 1.414` and `sqrt(3) ≈ 1.732`, then multiply by `Δx = 1`.'],
+        why: 'The exact value is `L_4 = 1 + sqrt(2) + sqrt(3) ≈ 4.146`.' },
+      { lead: 'The exact area is `F{16}{3} ≈ 5.333`. Why is `L_4 ≈ 4.146` too low?', ok: 0, pick: [
+        ['`sqrt(x)` is increasing on `[0, 4]`, so each left height is the smallest height on its piece', 'Each rectangle reaches the curve only at its left edge, the lowest point of its piece, so it sits under the curve.'],
+        ['A left sum is always too low', 'Paul warns against this. For a decreasing function a left sum is too high.'],
+        ['The first rectangle has height 0', 'It adds nothing, but that is not the reason. Every rectangle sits under the curve, because `sqrt(x)` is increasing.']] }],
+    graph: { x: [-0.25, 4.5], y: [0, 2.5], ticks: { x: 1, y: 0.5 },
+      bars: [0, 1, 2, 3].map(function (l) { return { x0: l, x1: l + 1, h: Math.sqrt(l), role: 'outside' }; }),
+      fns: [{ f: function (x) { return Math.sqrt(x); }, domain: [0, 4.5] }],
+      aria: 'The graph of y = square root of x from 0 to 4.5, rising, with four left-endpoint rectangles of width 1 on [0, 4]. The first has height 0; each of the others touches the curve at its upper left corner and sits below the curve.' },
+    after: 'Each left rectangle touches the curve at its upper left corner and sits under it, so the left sum misses the area above the rectangles.' },
+
+  /* 12. (twin 11.4) a table of decreasing rates: meaning, a left sum, too high */
+  { id: 'm4', sec: 'sec-more', task: 'Water drains from a tank. The table gives the rate `r(t)` at which it drains, in liters per minute, `t` minutes after it starts. The rate decreases throughout the 12 minutes.',
+    board: 'I{0}{12} r(t) dd{t}', v: 't', teach: ['#ex-p4', 'See Problem 4: adding up a table of rates'],
+    pre: function () {
+      return table('tb-m4', { caption: 'Rate at which water drains', cols: ['`t` (min)', '`r(t)` (L/min)'],
+        rows: [['0', '20'], ['4', '16'], ['8', '13'], ['12', '11']] });
+    },
+    steps: [
+      { lead: 'What does `I{0}{12} r(t) dd{t}` measure?', ok: 0, pick: [
+        ['The number of liters that drain out in the 12 minutes', '(liters per minute)(minutes) = liters, so the integral adds up the water that drains out.'],
+        ['The rate at which the water drains at `t = 12`, in liters per minute', 'That is `r(12) = 11`. The integral adds a rate times a time, which is an amount in liters.'],
+        ['The number of liters left in the tank after 12 minutes', 'The integral counts the water that drained out. You are not told how much the tank held at the start.']] },
+      { lead: 'Find the width of each time interval.', ask: 'Δt =', num: true, ans: '4', units: 'min',
+        wrongs: [['12', 'That is the whole 12 minutes. The rate is read every 4 minutes, and each reading starts one interval.'],
+          ['3', '3 is the number of intervals. The width is the time between readings.']],
+        hints: ['Look at the `t` column: how far apart are the readings?'] },
+      { lead: 'Find the left sum.', ask: '"left sum" =', num: true, ans: '196', units: 'L', unitAlts: ['liters'],
+        wrongs: [['49', 'That is the sum of the rates. Multiply it by `Δt = 4` minutes.'],
+          ['160', 'That is the right sum. The left sum uses the readings at the start of each interval, `t = 0, 4, 8`.'],
+          ['240', 'That adds all four readings. The left sum uses the three readings at `t = 0, 4, 8`.']],
+        hints: ['Add `r(0)`, `r(4)` and `r(8)`, then multiply by `Δt`.'] },
+      { lead: 'Is 196 liters too high or too low?', ok: 0, pick: [
+        ['Too high, because the rate decreases, so each left-hand rate is the largest on its interval', 'Each term uses the rate at the start of its interval, when the water drains fastest, so it counts too much water.'],
+        ['Too low, because a left sum is always too low', 'That holds only for an increasing rate. This rate decreases, so the left-hand rate is the largest on each interval.'],
+        ['Exactly right, because the table gives the rate', 'The table gives the rate only every 4 minutes. Between readings the rate keeps falling, so the sum is an estimate.']] }] },
+
+  /* 13. (twin 11.7) read the integral from a Riemann sum */
+  { id: 'm5', sec: 'sec-more', task: 'The expression below is a right sum for a definite integral. Identify the integral and find `lim{n→∞} R_n` exactly.', board: 'R_n = F{pi}{n} S{i=1}{n} sin(F{i pi}{n})', teach: T_DEF,
+    steps: [
+      { lead: 'The factor in front is `Δx = F{b − a}{n}`. Read the width of the whole interval from it.', ask: 'b − a =', num: true, ans: 'pi',
+        wrongs: [[['pi/n', 'π/n'], 'That is `Δx`, the width of one rectangle. `Δx = F{b − a}{n}`, so `b − a` is the top of the fraction.'],
+          ['n', '`n` is the number of rectangles. `Δx = F{b − a}{n} = F{pi}{n}`, so `b − a` is the top of the fraction.']],
+        hints: ['Match `F{pi}{n}` with `F{b − a}{n}`.'] },
+      { lead: 'A right sum uses the points `x_i = a + i Δx`. Inside the sine is `F{i pi}{n} = i · F{pi}{n}`. Read the starting point `a`.', ask: 'a =', num: true, ans: '0',
+        wrongs: [['pi', 'π is `b − a`, the width of the whole interval. Nothing is added before `i · F{pi}{n}`, so `a = 0`.'],
+          ['1', 'The sum starts at `i = 1`, which counts the first rectangle. Nothing is added before `i · F{pi}{n}`, so `a = 0`.']],
+        hints: ['Write `F{i pi}{n}` as `a + i · F{pi}{n}`. What number is `a`?'] },
+      { lead: 'So `a = 0`, `b = pi` and the sine is applied to `x_i`. Which integral is `lim{n→∞} R_n`?', ok: 0, pick: [
+        ['`I{0}{pi} sin x dd{x}`', 'The sum evaluates `f(x) = sin x` at the right endpoints of `[0, pi]`, so its limit is that integral.'],
+        ['`I{0}{pi} sin(F{i pi}{n}) dd{x}`', 'In the limit, `i` and `n` are gone: `F{i pi}{n}` is the point `x_i`, so the function is `sin x`.'],
+        ['`I{1}{pi} sin x dd{x}`', 'The lower limit is `a = 0`. The 1 in `i = 1` counts the first rectangle.']] },
+      { lead: 'Evaluate it with Part II. An antiderivative of `sin x` is `−cos x`.', ask: 'I{0}{pi} sin x dd{x} = (−cos pi) − (−cos 0) =', num: true, ans: '2',
+        wrongs: [['0', '`cos pi = −1`, not 1. So `−cos pi = 1`, and `1 − (−1) = 2`.'],
+          ['-2', 'That uses `cos x` as the antiderivative. `I{}{} sin x dd{x} = −cos x + c`, so the value is `(−cos pi) − (−cos 0)`.', T_TRIG],
+          ['1', 'Subtract the value at 0 as well: `−cos 0 = −1`, and `1 − (−1) = 2`.']],
+        hints: ['`cos pi = −1` and `cos 0 = 1`.'], teach: T_FTC2 }],
+    graph: { x: [-0.2, 3.5], y: [0, 1.25], ticks: { x: [0, Math.PI / 2, Math.PI], y: 0.5, xfmt: u11piFmt },
+      bars: [1, 2, 3, 4, 5, 6].map(function (i) { return { x0: (i - 1) * Math.PI / 6, x1: i * Math.PI / 6, h: Math.sin(i * Math.PI / 6), role: 'outside' }; }),
+      fns: [{ f: Math.sin, domain: [0, Math.PI] }],
+      aria: 'The graph of y = sin x from 0 to π, an arch of height 1, with six right-endpoint rectangles of width π/6. Their total, R_6, is close to the area under the arch, 2.' },
+    after: 'This is `R_6`, with six rectangles. As `n` grows, `R_n` approaches the area under the arch, which is 2.' },
+
+  /* 14. (twin 11.6) Part II: multiply out a square; a trig integrand */
+  { id: 'm6', sec: 'sec-more', task: 'Evaluate both integrals.', board: ['"(a)" I{−1}{2} (2x − 1)^2 dd{x}', '"(b)" I{0}{pi/2} (2cos x − 1) dd{x}'], teach: T_FTC2,
+    steps: [
+      { lead: 'For (a), what do you do with `(2x − 1)^2` first?', ok: 0, pick: [
+        ['Multiply it out', 'The rules in this unit integrate powers of `x` one term at a time, so write the square as a sum of terms first.'],
+        ['Square each term, to get `4x^2 + 1`', 'A square of a difference has a middle term: `(a − b)^2 = a^2 − 2ab + b^2`.'],
+        ['Use the power rule on the square, to get `F{(2x − 1)^3}{3}`', 'The power rule works on a power of `x` alone. The derivative of `F{(2x − 1)^3}{3}` is `2(2x − 1)^2`, twice the integrand. Multiply out first.']] },
+      { lead: 'Multiply out the square.', ask: '(2x − 1)^2 =', ans: '4x^2 - 4x + 1', form: FORM.expanded, teach: T_EXPAND,
+        wrongs: [['4x^2 + 1', 'A square of a difference has a middle term: `(2x − 1)^2 = (2x)^2 − 2(2x)(1) + 1`.'],
+          ['4x^2 - 2x + 1', 'The middle term is `−2 · 2x · 1 = −4x`.'],
+          ['2x^2 - 4x + 1', '`(2x)^2 = 4x^2`: the 2 is squared too.']],
+        hints: ['Use `(a − b)^2 = a^2 − 2ab + b^2` with `a = 2x` and `b = 1`.'] },
+      { lead: 'Find an antiderivative. You can leave out `+ c`.', ask: 'F(x) =', ans: '(4/3)x^3 - 2x^2 + x', upToC: true,
+        wrongs: [['8x - 4', 'That is the derivative of the integrand. Add 1 to each exponent and divide by the new exponent.'],
+          ['(4/3)x^3 - 2x^2', 'Integrate the 1 as well: `I{}{} 1 dd{x} = x`.'],
+          ['4x^3 - 4x^2 + x', 'Divide by each new exponent too: `I{}{} 4x^2 dd{x} = F{4}{3}x^3`.']],
+        hints: ['Integrate term by term: `I{}{} 4x^2 dd{x} = F{4x^3}{3}`, then do `−4x` and 1.'] },
+      { lead: 'Evaluate `F` at both limits and subtract. Put `−1` in parentheses.', ask: 'F(2) − F(−1) =', num: true, ans: '9',
+        wrongs: [['-9', 'Part II is `F(b) − F(a)`, the upper limit first: `F(2) − F(−1) = F{14}{3} − (−F{13}{3})`.', ['#ex-p7', 'See Problem 7: the upper limit first']],
+          ['1/3', 'Subtract `F(−1)`; do not add it.'],
+          ['19/3', '`(−1)^3 = −1`, so `F{4}{3}(−1)^3 = −F{4}{3}`.'],
+          ['5', '`(−1)^2 = 1`, so `−2(−1)^2 = −2`.']],
+        hints: ['`F(2) = F{32}{3} − 8 + 2 = F{14}{3}`. Find `F(−1) = F{4}{3}(−1)^3 − 2(−1)^2 + (−1)` the same way, then subtract.'] },
+      { lead: 'Now (b). Find an antiderivative of `2cos x − 1`.', ask: 'G(x) =', ans: '2sin(x) - x', upToC: true, teach: T_TRIG,
+        wrongs: [['-2sin(x) - x', '`I{}{} cos x dd{x} = sin x + c`, with no minus sign. Check: the derivative of `sin x` is `cos x`.'],
+          ['2sin(x)', 'Integrate the `−1` as well: `I{}{} 1 dd{x} = x`.'],
+          ['2sin(x) - 1', 'A constant integrates to the constant times `x`: `I{}{} 1 dd{x} = x`.']],
+        hints: ['Use `I{}{} cos x dd{x} = sin x + c` and `I{}{} 1 dd{x} = x`.'] },
+      { lead: 'Evaluate `G` at both limits and subtract.', ask: 'G(F{pi}{2}) − G(0) =', num: true, ans: '2 - pi/2', tol: 0.006,
+        wrongs: [['2', 'Include the `−x` term: `G(F{pi}{2}) = 2 sin(F{pi}{2}) − F{pi}{2} = 2 − F{pi}{2}`.'],
+          ['1 - pi/2', '`2 sin(F{pi}{2}) = 2 · 1 = 2`. Keep the 2.'],
+          ['pi/2 - 2', 'Part II is `G(b) − G(a)`, the upper limit first. `G(0) = 0`, so the answer is `G(F{pi}{2})`.']],
+        hints: ['`sin(F{pi}{2}) = 1` and `sin 0 = 0`.'],
+        why: 'The exact value is `2 − F{pi}{2} ≈ 0.429`.' }],
+    graph: { x: [-0.1, 1.75], y: [-1.25, 1.25], ticks: { x: [0, Math.PI / 3, Math.PI / 2], y: 0.5, xfmt: u11piFmt },
+      fns: [{ f: u11m14, domain: [-0.1, 1.75] }], shade: [{ f: 0, a: 0, b: Math.PI / 2, role: 'outside', signed: true }],
+      aria: 'The graph of y = 2 cos x − 1 from 0 to π/2. It starts at 1, crosses the x-axis at π/3, and ends at −1. The region above the axis, from 0 to π/3, is solid; the smaller region below it, from π/3 to π/2, is hatched.' },
+    after: 'For (b), the region above the axis is larger than the one below it, so the net area `2 − F{pi}{2} ≈ 0.43` is positive.' },
+
+  /* 15. (value-add: Paul, Computing Definite Integrals, Problems 7 and 13) check before Part II; ln|y| on negative numbers */
+  { id: 'm7', sec: 'sec-more', task: 'Decide whether Part II applies to (a). Then evaluate (b).', board: ['"(a)" I{−2}{4} (x^6 − x^4 + F{1}{x^2}) dd{x}', '"(b)" I{−5}{−2} (7e^y + F{2}{y}) dd{y}'], teach: T_LNNEG,
+    steps: [
+      { lead: 'Can you evaluate (a) with Part II?', ok: 0, pick: [
+        ['No: `F{1}{x^2}` has no value at `x = 0`, which is between −2 and 4', 'Part II needs an integrand with a value at every point from `a` to `b`. At `x = 0` this one has a vertical asymptote, so Part II does not apply.', T_CONT],
+        ['Yes: find an antiderivative, then subtract its values at 4 and −2', 'An antiderivative has no value at `x = 0` either, so its change from −2 to 4 means nothing. Check for a zero denominator between `a` and `b` before you integrate.', T_CONT],
+        ['Yes, because neither −2 nor 4 makes `x^2` zero', 'Checking the limits is not enough. The trouble is at `x = 0`, between them.', T_CONT]] },
+      { lead: 'For (b), which antiderivative of `F{2}{y}` works on `[−5, −2]`?', ok: 0, pick: [
+        ['`2 ln|y|`', '`ln|y|` has a value for every `y ≠ 0`, negative numbers included, and its derivative is `F{1}{y}`.'],
+        ['`2 ln y`', '`ln y` has no value for `y < 0`, so `ln(−2)` means nothing. The absolute value is what lets the formula work for negative `y`.'],
+        ['`−F{2}{y^2}`', 'That is the derivative of `F{2}{y}`, not an antiderivative. Check a candidate by differentiating it.']] },
+      { show: 'G(y) = 7e^y + 2 ln|y|' },
+      { lead: 'Evaluate `G` at the upper limit. Use a calculator, such as the [Desmos scientific calculator](' + DESMOS + '), and keep three decimal places.', ask: 'G(−2) = 7e^(−2) + 2 ln|−2| =', num: true, ans: '7e^(-2) + 2ln(2)', tol: 0.006,
+        wrongs: [['7e^(-2) - 2ln(2)', '`|−2| = 2`, so `ln|−2| = ln 2 ≈ 0.693`, a positive number.'],
+          ['7e^2 + 2ln(2)', 'Keep the minus sign in the exponent: `e^(−2) = F{1}{e^2} ≈ 0.135`.'],
+          ['7e^(-2)', 'Include the logarithm term: `2 ln|−2| = 2 ln 2 ≈ 1.386`.']],
+        hints: ['`e^(−2) ≈ 0.1353` and `ln 2 ≈ 0.6931`.'] },
+      { lead: 'Evaluate `G` at the lower limit.', ask: 'G(−5) = 7e^(−5) + 2 ln|−5| =', num: true, ans: '7e^(-5) + 2ln(5)', tol: 0.006,
+        wrongs: [['7e^(-5) - 2ln(5)', '`|−5| = 5`, so `ln|−5| = ln 5 ≈ 1.609`, a positive number.'],
+          ['7e^5 + 2ln(5)', 'Keep the minus sign in the exponent: `e^(−5) = F{1}{e^5} ≈ 0.0067`.']],
+        hints: ['`e^(−5) ≈ 0.0067` and `ln 5 ≈ 1.6094`.'] },
+      { lead: 'Subtract, upper limit first.', ask: 'I{−5}{−2} (7e^y + F{2}{y}) dd{y} = G(−2) − G(−5) =', num: true, ans: '7e^(-2) - 7e^(-5) + 2ln(2) - 2ln(5)', tol: 0.006,
+        wrongs: [['0.932', 'Part II is `G(b) − G(a)`, the upper limit first: `G(−2) − G(−5)`. Here `b = −2`, because −2 is the upper limit.', ['#ex-p7', 'See Problem 7: the upper limit first']],
+          ['5.600', 'Subtract `G(−5)`; do not add it.']],
+        hints: ['Subtract your two values: `G(−2) − G(−5)`.'],
+        why: 'A negative value is right: from −5 to −2 the term `F{2}{y}` is negative and larger in size than `7e^y`, so the graph is below the axis.' }] },
+
+  /* 16. (twin 11.9) Part I with the chain rule at both limits */
+  { id: 'm8', sec: 'sec-more', task: 'Find `G′(x)` and `G′(1)`.', board: ['G(x) = I{sqrt(x)}{x^2} e^(−t) dd{t}', '"for" x > 0'], teach: T_FTC1,
+    steps: [
+      { lead: 'Part I needs a number as the lower limit. What do you do first?', ok: 0, pick: [
+        ['Split at 0: `G(x) = −I{0}{sqrt(x)} e^(−t) dd{t} + I{0}{x^2} e^(−t) dd{t}`', 'Splitting at a number and swapping the limits of the first piece gives two integrals that Part I can handle.'],
+        ['Use Part I as it is: put `x^2` in place of `t`', 'That handles only the upper limit. The lower limit `sqrt(x)` changes with `x` too, so split at a number first.'],
+        ['Swap the limits', 'Swapping changes the sign, but both limits still change with `x`. Split at a number first.']] },
+      { lead: 'Differentiate the upper piece: put `x^2` in place of `t`, then multiply by the derivative of `x^2`.', ask: 'Dx I{0}{x^2} e^(−t) dd{t} =', ans: '2x e^(-x^2)',
+        wrongs: [['e^(-x^2)', 'Multiply by the derivative of the upper limit, `Dx (x^2) = 2x`. That is the chain rule.', ['#ex-p8', 'See Problem 8: the chain rule with Part I']],
+          ['2x e^(-x)', 'Put `x^2` in place of `t`: `e^(−t)` becomes `e^(−x^2)`.'],
+          ['-2x e^(-x^2)', 'That is the derivative of the integrand. Part I gives the integrand itself, `e^(−x^2)`, times `2x`.']],
+        hints: ['Replace `t` with `x^2` in `e^(−t)`, then multiply by `2x`.'] },
+      { lead: 'Differentiate the lower piece the same way, without its minus sign. The derivative of `sqrt(x)` is `F{1}{2sqrt(x)}`.', ask: 'Dx I{0}{sqrt(x)} e^(−t) dd{t} =', ans: 'e^(-sqrt(x))/(2sqrt(x))',
+        wrongs: [['e^(-sqrt(x))', 'Multiply by the derivative of `sqrt(x)`, which is `F{1}{2sqrt(x)}`.'],
+          ['e^(-x)/(2sqrt(x))', 'Put `sqrt(x)` in place of `t`: `e^(−t)` becomes `e^(−sqrt(x))`.']],
+        hints: ['Replace `t` with `sqrt(x)` in `e^(−t)`, then multiply by `F{1}{2sqrt(x)}`.'] },
+      { lead: 'Put the pieces together, as in the split: the upper piece minus the lower piece.', ask: 'G′(x) =', ans: '2x e^(-x^2) - e^(-sqrt(x))/(2sqrt(x))',
+        wrongs: [['2x e^(-x^2) + e^(-sqrt(x))/(2sqrt(x))', 'The lower piece came with a minus sign when you swapped its limits, so subtract it.'],
+          ['e^(-sqrt(x))/(2sqrt(x)) - 2x e^(-x^2)', 'That is the lower piece minus the upper piece. The split was `−I{0}{sqrt(x)} + I{0}{x^2}`, so the upper piece is the positive one.'],
+          ['e^(-x^2) - e^(-sqrt(x))', 'Keep the chain rule factors, `2x` and `F{1}{2sqrt(x)}`.', ['#ex-p8', 'See Problem 8: the chain rule with Part I']]],
+        hints: ['Use your two rows: `2x e^(−x^2)` minus `F{e^(−sqrt(x))}{2sqrt(x)}`.'] },
+      { lead: 'Evaluate it at `x = 1`.', ask: 'G′(1) =', num: true, ans: '3/(2e)',
+        wrongs: [['5/(2e)', 'Subtract the second term: `F{2}{e} − F{1}{2e} = F{4}{2e} − F{1}{2e}`.'],
+          ['0', 'At `x = 1` both limits are 1, but the chain rule factors differ: `2 · 1 = 2` and `F{1}{2 sqrt(1)} = F{1}{2}`.'],
+          ['-3/(2e)', 'The first term, `F{2}{e}`, is the larger one, so the answer is positive.']],
+        hints: ['At `x = 1`: `2x e^(−x^2) = 2e^(−1) = F{2}{e}` and `F{e^(−sqrt(x))}{2sqrt(x)} = F{1}{2e}`.'],
+        why: 'The exact value is `G′(1) = F{3}{2e} ≈ 0.552`.' }] },
+
+  /* 17. (twin 11.10) an integral function from a graph: critical points and their values */
+  { id: 'm9', sec: 'sec-more', task: 'The graph of `f` is made of straight segments. Let `h(x) = I{0}{x^2} f(t) dd{t}` for `0 ≤ x ≤ sqrt(7)`. Find every critical point of `h` inside this interval, classify each one, and find `h` at each.',
+    board: 'h(x) = I{0}{x^2} f(t) dd{t}', teach: T_FTC1,
+    pre: function () {
+      return figure('pre-m9', plot({ x: [-0.5, 7.5], y: [-2.5, 2.5], ticks: { x: 1, y: 1 }, w: 380, h: 240, grid: true, labels: { x: 't' },
+        fns: [{ f: u11m17f, domain: [0, 7] }],
+        dots: [{ x: 0, y: 2, label: '(0, 2)', at: 'ne' }, { x: 2, y: 0, label: '(2, 0)', at: 'ne' }, { x: 4, y: -2, label: '(4, −2)', at: 'e' }, { x: 6, y: 0, label: '(6, 0)', at: 'nw' }, { x: 7, y: 1 }],
+        aria: 'The graph of f, in straight segments, with grid lines 1 unit apart. It falls from (0, 2), crossing the t-axis at (2, 0), to a low point at (4, −2), then rises, crossing the t-axis at (6, 0), to (7, 1). So f is above the axis from t = 0 to 2, below it from 2 to 6, and above it from 6 to 7.' }),
+        'The graph of `f`. It is above the `t`-axis from 0 to 2, below it from 2 to 6, and above it from 6 to 7.');
+    },
+    steps: [
+      { lead: 'Which is `h′(x)`?', ok: 0, pick: [
+        ['`f(x^2) · 2x`', 'Part I with the chain rule: put the upper limit `x^2` into `f`, then multiply by its derivative, `2x`.'],
+        ['`f(x)`', 'The upper limit is `x^2`, not `x`. Put `x^2` into `f` and multiply by its derivative, `2x`.', ['#ex-p8', 'See Problem 8: the chain rule with Part I']],
+        ['`f(x^2)`', 'Multiply by the derivative of the upper limit, `2x`. That is the chain rule.', ['#ex-p8', 'See Problem 8: the chain rule with Part I']]] },
+      { lead: 'For `x > 0` the factor `2x` is positive, so `h′(x) = 0` only where `f(x^2) = 0`. First find where `f(t) = 0`, for `0 < t < 7`.', ask: 't =', num: true, list: true, ans: '2, 6',
+        wrongs: [['4', '`f(4) = −2` is the lowest point of the graph, not a zero. Find where the graph crosses the `t`-axis.'],
+          [['sqrt(2), sqrt(6)', '1.414, 2.449'], 'Those are the values of `x`, which come next. This row asks for `t`, where the graph crosses the axis.']],
+        hints: ['Read where the graph of `f` crosses the `t`-axis. There are two places.'] },
+      { lead: 'Now solve `x^2 = t` for each of them, keeping only `x` with `0 < x < sqrt(7)`.', ask: '"critical points:" x =', num: true, list: true, ans: 'sqrt(2), sqrt(6)',
+        wrongs: [['2, 6', 'Those are values of `t = x^2`. Solve `x^2 = 2` and `x^2 = 6` for `x`.'],
+          ['-sqrt(2), sqrt(2), -sqrt(6), sqrt(6)', 'The negative roots are outside the interval `0 ≤ x ≤ sqrt(7)`.'],
+          ['0, sqrt(2), sqrt(6)', '`x = 0` is the left end of the interval, not a point inside it.']],
+        hints: ['`x^2 = 2` gives `x = sqrt(2)`. Do the same for 6.'] },
+      { lead: 'Classify `x = sqrt(2)`. For `x` a little below `sqrt(2)`, `x^2` is a little below 2.', ok: 0, pick: [
+        ['A local maximum: `h′` changes from + to −', 'Just below `sqrt(2)`, `f(x^2)` is above the axis, so `h′ > 0`; just above it, `x^2` is past 2, where `f` is below the axis, so `h′ < 0`.'],
+        ['A local minimum: `h′` changes from − to +', 'Just below `sqrt(2)`, `x^2` is just below 2, where `f` is above the axis. So `h′` is positive first, then negative.'],
+        ['Neither: `h′` keeps its sign', 'The graph of `f` crosses the axis at `t = 2`, so `f(x^2)` changes sign at `x = sqrt(2)`.']] },
+      { lead: 'Classify `x = sqrt(6)`.', ok: 0, pick: [
+        ['A local minimum: `h′` changes from − to +', 'Just below `sqrt(6)`, `x^2` is just below 6, where `f` is below the axis; just above it, `f` is above the axis.'],
+        ['A local maximum: `h′` changes from + to −', 'Just below `sqrt(6)`, `x^2` is just below 6, where `f` is below the axis, so `h′` is negative first.'],
+        ['Neither: `h′` keeps its sign', 'The graph of `f` crosses the axis at `t = 6`, so `f(x^2)` changes sign at `x = sqrt(6)`.']] },
+      { lead: 'Find `h(sqrt(2))`, the net area under `f` from 0 to 2, from a triangle.', ask: 'h(sqrt(2)) = I{0}{2} f(t) dd{t} =', num: true, ans: '2',
+        wrongs: [['4', 'A triangle’s area is `F{1}{2} · "base" · "height" = F{1}{2} · 2 · 2`.', ['#ex-p5', 'See Problem 5: net area from triangles']],
+          ['-2', 'From 0 to 2 the graph is above the axis, so this area counts as positive.']],
+        hints: ['The triangle runs from `t = 0` to `t = 2`, and its height is `f(0) = 2`.'] },
+      { lead: 'Find `h(sqrt(6))`, the net area under `f` from 0 to 6.', ask: 'h(sqrt(6)) = I{0}{6} f(t) dd{t} =', num: true, ans: '-2',
+        wrongs: [['6', 'That is the total area, `2 + 4`. The triangle below the axis, from 2 to 6, counts as negative.', ['#ex-p5', 'See Problem 5: net area from triangles']],
+          ['-4', 'That is only the part from 2 to 6. Add the 2 from 0 to 2: `2 − 4`.'],
+          ['0', 'The triangle below the axis runs from 2 to 6: base 4, height 2, so its area is 4, not 2.']],
+        hints: ['Add the 2 from the last step to the triangle from 2 to 6, which is below the axis and counts as negative.'] }],
+    graph: { x: [0, 2.75], y: [-3, 2.6], ticks: { x: 0.5, y: [-2, -1, 0, 1, 2] }, fns: [{ f: u11m17h, domain: [0, Math.sqrt(7)] }],
+      dots: [{ x: Math.SQRT2, y: 2, label: '(√2, 2)', at: 'ne' }, { x: Math.sqrt(6), y: -2, label: '(√6, −2)', at: 'sw' }],
+      aria: 'The graph of h(x) from 0 to the square root of 7. It rises from (0, 0) to a local maximum at (√2, 2), falls to a local minimum at (√6, −2), and rises a little to about (2.65, −1.5).' },
+    after: 'As `x` grows, the upper limit `x^2` sweeps right along the `t`-axis. The function `h` rises while it adds area above the axis, until `t = 2`, and falls while it adds area below, until `t = 6`.' }
 ];
 
 /* ================================ builder (the Unit 3 builder; `pre` and power slips added) ================================ */
@@ -3234,7 +3546,7 @@ function backHTML() {
 function page() {
   return header('Unit 11 Practice', SECTIONS_P.map(function (s) { return ['#' + s.id, s.nav]; }).concat([['#sec-back', 'Next']])) +
     '<main id="top">' + hero({ kicker: 'Calculus I · Unit 11: Adding Up: The Definite Integral', title: 'Unit 11 Practice',
-      dek: 'Use this page after you read Unit 11: Adding Up: The Definite Integral and Unit 11 Worked Examples. For each problem, choose the method, then type each line of the work. Each line is checked before the next one opens. Type a power with ⟦^⟧, as in ⟦x^2⟧ or ⟦x^(3/2)⟧, and put a whole top or bottom in parentheses, as in ⟦(x + 1)/(x − 2)⟧.' }) +
+      dek: 'Use this page after you read Unit 11: Adding Up: The Definite Integral and Unit 11 Worked Examples. For each problem, choose the method, then type each line of the work. Each line is checked before the next one opens. Problems 9 to 17, under More Practice, are optional. Type a power with ⟦^⟧, as in ⟦x^2⟧ or ⟦x^(3/2)⟧, and put a whole top or bottom in parentheses, as in ⟦(x + 1)/(x − 2)⟧.' }) +
     SECTIONS_P.map(sectionHTML).join('') + backHTML() + '</main>';
 }
 expose({ PROBLEMS: PROBLEMS, problemHTML: problemHTML, formProblem: formProblem, stepDone: stepDone });
